@@ -1,5 +1,4 @@
 # OpenMarket: реестр пользователей
 # Формат: email|salt|sha256(salt:password)|createdAtMillis|role
-demo@openmarket.app|7a0ced8b73e62caad9b49799a12ac442|38b6a287650d6c765337555140030fd439b7257d009272eee16c500409becb34|1793802479103|user
 admin@openmarket.app|01f254d602ad7a198b33a43f878c2829|591356270dd9231caefae7898bc7e2b194f9a988529f2f9d71a907b3b17bf93a|1793802479103|admin
 test.user@openmarket.app|d6e4090e63d91ca36abcc7ce286f20fc|0994bd5c5d874398f73637dfb1c2dad5d7b5f82ffb1334ce50765fbbcf32e039|1793802885744|user
