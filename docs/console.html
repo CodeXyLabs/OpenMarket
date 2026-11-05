@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Консоль разработчика — OpenMarket</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root { --brand: #4B2BE6; --ink: #1d1a2b; --muted: #6b6780; --line: rgba(30, 20, 70, .1); }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f7f6fb; color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .console { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+    .side { background: #fff; border-right: 1px solid var(--line); padding: 20px 14px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+    .side .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; margin: 0 8px 24px; text-decoration: none; color: var(--ink); }
+    .side .logo { width: 26px; height: 26px; border-radius: 9px; background: linear-gradient(135deg, #4B2BE6, #A22BE0 60%, #FF7A45); }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 12px; font-size: 14px; color: #3c3850; text-decoration: none; cursor: pointer; }
+    .nav-item:hover { background: #f2effc; }
+    .nav-item.active { background: #ede9ff; color: var(--brand); font-weight: 600; }
+    .nav-sep { margin: 16px 12px 8px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #9a95ad; }
+    .main { padding: 28px 32px 48px; min-width: 0; }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+    .topline h1 { margin: 0; font-size: 24px; }
+    .topline .who { font-size: 13px; color: var(--muted); }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .card { background: #fff; border-radius: 18px; padding: 18px; border: 1px solid var(--line); }
+    .card .label { font-size: 12.5px; color: var(--muted); }
+    .card .value { font-size: 26px; font-weight: 700; margin-top: 6px; }
+    .panel { background: #fff; border-radius: 20px; border: 1px solid var(--line); padding: 20px; margin-bottom: 18px; }
+    .panel h2 { margin: 0 0 14px; font-size: 17px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    th { font-size: 12.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    tr:last-child td { border-bottom: 0; }
+    .muted { color: var(--muted); }
+    .pill { display: inline-block; padding: 3px 9px; border-radius: 999px; background: #f1eefc; font-size: 12px; color: #4a3fa8; }
+    .pill.ok { background: #e8f7ee; color: #125c34; }
+    .pill.warn { background: #fff4e5; color: #8a4b00; }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .toolbar input, .toolbar select { padding: 9px 12px; border-radius: 11px; border: 1px solid var(--line); font: inherit; font-size: 14px; background: #fff; color: var(--ink); }
+    .btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 13px; padding: 10px 16px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .btn.primary { background: var(--brand); color: #fff; }
+    .btn.ghost { background: #f1eefc; color: #3c3850; }
+    .review { border-bottom: 1px solid var(--line); padding: 14px 0; }
+    .review:last-child { border-bottom: 0; }
+    .review .head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-size: 13.5px; }
+    .review .stars { color: #f2a20c; letter-spacing: 1px; }
+    .review p { margin: 8px 0 0; font-size: 14px; line-height: 1.55; }
+    .review .reply { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #f7f5ff; font-size: 13.5px; line-height: 1.5; }
+    .bars { display: flex; align-items: flex-end; gap: 8px; height: 150px; margin-top: 8px; }
+    .bars div { flex: 1; background: linear-gradient(180deg, #7a5cf0, #4B2BE6); border-radius: 8px 8px 3px 3px; min-height: 3px; }
+    .empty { padding: 26px 0; text-align: center; color: var(--muted); font-size: 14px; }
+    .section { display: none; }
+    .section.active { display: block; }
+    @media (max-width: 760px) {
+      .console { grid-template-columns: 1fr; }
+      .side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .main { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="console">
+  <aside class="side">
+    <a class="brand" href="index.html"><span class="logo"></span><span>OpenMarket</span></a>
+    <div class="nav-sep">Консоль</div>
+    <div class="nav-item active" data-view="overview">Обзор</div>
+    <div class="nav-item" data-view="apps">Приложения</div>
+    <div class="nav-item" data-view="versions">Версии</div>
+    <div class="nav-item" data-view="reviews">Отзывы</div>
+    <div class="nav-item" data-view="stats">Статистика</div>
+    <div class="nav-sep">Публикация</div>
+    <div class="nav-item" data-view="publish">Новое приложение</div>
+    <div class="nav-sep">Магазин</div>
+    <a class="nav-item" href="index.html">Каталог</a>
+    <a class="nav-item" href="guide.html">Гайд разработчика</a>
+  </aside>
+
+  <main class="main">
+    <div class="topline">
+      <h1 id="viewTitle">Обзор</h1>
+      <div class="who" id="who">Данные каталога из репозитория</div>
+    </div>
+
+    <section class="section active" id="view-overview">
+      <div class="cards">
+        <div class="card"><div class="label">Приложения</div><div class="value" id="cApps">—</div></div>
+        <div class="card"><div class="label">Установки</div><div class="value" id="cInstalls">—</div></div>
+        <div class="card"><div class="label">Отзывы</div><div class="value" id="cReviews">—</div></div>
+        <div class="card"><div class="label">Средний рейтинг</div><div class="value" id="cRating">—</div></div>
+      </div>
+      <div class="panel">
+        <h2>Приложения</h2>
+        <table><thead><tr><th>Название</th><th>Категория</th><th>Установки</th><th>Рейтинг</th></tr></thead>
+          <tbody id="overviewApps"></tbody></table>
+        <div class="empty" id="overviewEmpty">Каталог пуст — опубликуйте первое приложение.</div>
+      </div>
+      <div class="panel">
+        <h2>Последние отзывы</h2>
+        <div id="overviewReviews"></div>
+      </div>
+    </section>
+
+    <section class="section" id="view-apps">
+      <div class="toolbar">
+        <input id="appsSearch" type="search" placeholder="Поиск по названию или разработчику">
+        <select id="appsCategory">
+          <option value="">Все категории</option>
+          <option value="Приложение">Приложения</option>
+          <option value="Игра">Игры</option>
+        </select>
+      </div>
+      <div class="panel">
+        <table><thead><tr><th>Название</th><th>Разработчик</th><th>Версия</th><th>Размер</th><th>Установки</th><th>Проверка</th><th>Обновлено</th></tr></thead>
+          <tbody id="appsTable"></tbody></table>
+        <div class="empty" id="appsEmpty">Ничего не найдено.</div>
+      </div>
+    </section>
+
+    <section class="section" id="view-versions">
+      <div class="toolbar"><select id="versionsApp"></select></div>
+      <div class="panel">
+        <table><thead><tr><th>Версия</th><th>Размер</th><th>Дата</th><th>SHA-256</th></tr></thead>
+          <tbody id="versionsTable"></tbody></table>
+        <div class="empty" id="versionsEmpty">У этого приложения пока одна версия.</div>
+      </div>
+    </section>
+
+    <section class="section" id="view-reviews">
+      <div class="toolbar">
+        <select id="reviewsApp"><option value="">Все приложения</option></select>
+        <select id="reviewsRating">
+          <option value="">Любая оценка</option>
+          <option value="5">5 звёзд</option>
+          <option value="4">4 звезды</option>
+          <option value="3">3 звезды</option>
+          <option value="2">2 звезды</option>
+          <option value="1">1 звезда</option>
+        </select>
+      </div>
+      <div class="panel" id="reviewsList"></div>
+    </section>
+
+    <section class="section" id="view-stats">
+      <div class="cards">
+        <div class="card"><div class="label">Всего установок</div><div class="value" id="sInstalls">—</div></div>
+        <div class="card"><div class="label">Приложений с установками</div><div class="value" id="sAppsWithInstalls">—</div></div>
+      </div>
+      <div class="panel">
+        <h2>Установки по приложениям</h2>
+        <div class="bars" id="statsBars"></div>
+        <div class="empty" id="statsEmpty">Счётчик установок пуст: данные появляются, когда пользователи устанавливают приложения из приложения OpenMarket.</div>
+      </div>
+    </section>
+
+    <section class="section" id="view-publish">
+      <div class="panel">
+        <h2>Публикация</h2>
+        <p class="muted" style="font-size:14px;line-height:1.6">
+          Публикация из консоли требует GitHub-токен: он вводится в настройках каталога и хранится только в браузере.
+          Файл до 90 МБ; крупные APK публикуйте из Android-приложения — там лимит выше.
+        </p>
+        <div class="toolbar" style="margin-top:14px">
+          <a class="btn primary" href="index.html">Перейти к публикации</a>
+          <a class="btn ghost" href="guide.html">Гайд разработчика</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  var RAW = 'https://raw.githubusercontent.com/CodeXyLabs/OpenMarket/main/';
+  var state = { apps: [], reviews: [], downloads: {}, view: 'overview' };
+  var titles = { overview: 'Обзор', apps: 'Приложения', versions: 'Версии', reviews: 'Отзывы', stats: 'Статистика', publish: 'Публикация' };
+
+  function el(id) { return document.getElementById(id); }
+  function esc(value) { return String(value == null ? '' : value).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+  function fmtBytes(bytes) {
+    if (!bytes) return '—';
+    var mb = bytes / (1024 * 1024);
+    return mb >= 1024 ? (mb / 1024).toFixed(2) + ' ГБ' : mb.toFixed(1) + ' МБ';
+  }
+  function fmtDate(ms) {
+    if (!ms) return '—';
+    var d = new Date(Number(ms));
+    return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+  function stars(rating) { var n = Math.max(0, Math.min(5, Number(rating) || 0)); return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); }
+
+  function getJson(file, fallback) {
+    return fetch(RAW + file + '?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : fallback; })
+      .catch(function () { return fallback; });
+  }
+
+  function appRating(appId) {
+    var list = state.reviews.filter(function (r) { return r.appId === appId; });
+    if (!list.length) return null;
+    return list.reduce(function (sum, r) { return sum + (Number(r.rating) || 0); }, 0) / list.length;
+  }
+  function installsOf(appId) { return Number(state.downloads[appId] || 0); }
+
+  function renderOverview() {
+    var totalInstalls = state.apps.reduce(function (s, a) { return s + installsOf(a.id); }, 0);
+    var rated = state.apps.map(function (a) { return appRating(a.id); }).filter(function (v) { return v != null; });
+    el('cApps').textContent = state.apps.length;
+    el('cInstalls').textContent = totalInstalls;
+    el('cReviews').textContent = state.reviews.length;
+    el('cRating').textContent = rated.length ? (rated.reduce(function (s, v) { return s + v; }, 0) / rated.length).toFixed(1) : '—';
+
+    el('overviewApps').innerHTML = state.apps.map(function (app) {
+      var rating = appRating(app.id);
+      return '<tr><td>' + esc(app.name) + '</td><td>' + esc(app.category || '') + '</td><td>' +
+        installsOf(app.id) + '</td><td>' + (rating == null ? '<span class="muted">нет оценок</span>' : '★ ' + rating.toFixed(1)) + '</td></tr>';
+    }).join('');
+    el('overviewEmpty').style.display = state.apps.length ? 'none' : 'block';
+
+    var recent = state.reviews.slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }).slice(0, 5);
+    el('overviewReviews').innerHTML = recent.length ? recent.map(reviewHtml).join('') :
+      '<div class="empty">Отзывов пока нет.</div>';
+  }
+
+  function renderApps() {
+    var query = (el('appsSearch').value || '').trim().toLowerCase();
+    var category = el('appsCategory').value;
+    var list = state.apps.filter(function (app) {
+      var haystack = ((app.name || '') + ' ' + (app.developer || '')).toLowerCase();
+      return (!query || haystack.indexOf(query) !== -1) && (!category || app.category === category);
+    });
+
+    el('appsTable').innerHTML = list.map(function (app) {
+      var scan = app.scanLevel || 'unknown';
+      var cls = scan === 'safe' || scan === 'low' ? 'ok' : (scan === 'high' ? 'warn' : '');
+      var scanText = { safe: 'безопасно', low: 'низкий риск', medium: 'средний риск', high: 'высокий риск', unknown: 'не проверено' }[scan] || scan;
+      return '<tr><td><b>' + esc(app.name) + '</b><div class="muted" style="font-size:12px">' + esc(app.subcategory || '') + '</div></td>' +
+        '<td>' + esc(app.developer || '') + '</td><td>' + esc(app.versionCode || '—') + '</td><td>' + fmtBytes(app.sizeBytes) + '</td>' +
+        '<td>' + installsOf(app.id) + '</td><td><span class="pill ' + cls + '">' + esc(scanText) + '</span></td><td>' + fmtDate(app.uploadedAt) + '</td></tr>';
+    }).join('');
+    el('appsEmpty').style.display = list.length ? 'none' : 'block';
+  }
+
+  function fillAppSelects() {
+    var options = state.apps.map(function (app) { return '<option value="' + esc(app.id) + '">' + esc(app.name) + '</option>'; }).join('');
+    el('versionsApp').innerHTML = options || '<option value="">Нет приложений</option>';
+    el('reviewsApp').innerHTML = '<option value="">Все приложения</option>' + options;
+    renderVersions();
+  }
+
+  function renderVersions() {
+    var id = el('versionsApp').value;
+    var app = state.apps.filter(function (item) { return item.id === id; })[0];
+    var versions = (app && Array.isArray(app.versions) ? app.versions.slice() : []);
+    if (app && !versions.length) versions = [{ versionCode: app.versionCode || 1, sizeBytes: app.sizeBytes, uploadedAt: app.uploadedAt, sha256: app.sha256 }];
+
+    el('versionsTable').innerHTML = versions.map(function (v) {
+      return '<tr><td>' + esc(v.versionCode || v.versionName || '—') + '</td><td>' + fmtBytes(v.sizeBytes) + '</td><td>' +
+        fmtDate(v.uploadedAt) + '</td><td class="muted" style="font-size:12px;word-break:break-all">' + esc((v.sha256 || '').slice(0, 16)) + '…</td></tr>';
+    }).join('');
+    el('versionsEmpty').style.display = versions.length ? 'none' : 'block';
+  }
+
+  function reviewHtml(review) {
+    var app = state.apps.filter(function (item) { return item.id === review.appId; })[0];
+    return '<div class="review"><div class="head"><span class="stars">' + stars(review.rating) + '</span>' +
+      '<b>' + esc(app ? app.name : 'приложение') + '</b><span class="muted">' + esc(review.author || '') + '</span>' +
+      '<span class="muted">' + fmtDate(review.createdAt) + '</span></div>' +
+      '<p>' + (review.text ? esc(review.text) : '<span class="muted">без текста</span>') + '</p>' +
+      (review.reply ? '<div class="reply"><b>Ответ разработчика:</b> ' + esc(review.reply) + '</div>' : '') + '</div>';
+  }
+
+  function renderReviews() {
+    var appId = el('reviewsApp').value;
+    var rating = el('reviewsRating').value;
+    var list = state.reviews.filter(function (review) {
+      return (!appId || review.appId === appId) && (!rating || String(review.rating) === rating);
+    }).sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+
+    el('reviewsList').innerHTML = list.length ? list.map(reviewHtml).join('') : '<div class="empty">Отзывов нет.</div>';
+  }
+
+  function renderStats() {
+    var rows = state.apps.map(function (app) { return { name: app.name, count: installsOf(app.id) }; })
+      .sort(function (a, b) { return b.count - a.count; });
+    var total = rows.reduce(function (s, row) { return s + row.count; }, 0);
+    var withInstalls = rows.filter(function (row) { return row.count > 0; }).length;
+    el('sInstalls').textContent = total;
+    el('sAppsWithInstalls').textContent = withInstalls;
+
+    var max = rows.reduce(function (m, row) { return Math.max(m, row.count); }, 0);
+    el('statsBars').innerHTML = rows.map(function (row) {
+      var height = max ? Math.max(3, Math.round((row.count / max) * 140)) : 3;
+      return '<div title="' + esc(row.name) + ': ' + row.count + '" style="height:' + height + 'px"></div>';
+    }).join('');
+    el('statsEmpty').style.display = total ? 'none' : 'block';
+  }
+
+  function show(view) {
+    state.view = view;
+    document.querySelectorAll('.nav-item[data-view]').forEach(function (node) {
+      node.classList.toggle('active', node.getAttribute('data-view') === view);
+    });
+    document.querySelectorAll('.section').forEach(function (section) {
+      section.classList.toggle('active', section.id === 'view-' + view);
+    });
+    el('viewTitle').textContent = titles[view] || 'Консоль';
+    if (location.hash !== '#' + view) history.replaceState(null, '', '#' + view);
+  }
+
+  document.querySelectorAll('.nav-item[data-view]').forEach(function (node) {
+    node.addEventListener('click', function () { show(node.getAttribute('data-view')); });
+  });
+  el('appsSearch').addEventListener('input', renderApps);
+  el('appsCategory').addEventListener('change', renderApps);
+  el('versionsApp').addEventListener('change', renderVersions);
+  el('reviewsApp').addEventListener('change', renderReviews);
+  el('reviewsRating').addEventListener('change', renderReviews);
+
+  Promise.all([getJson('apps.json', []), getJson('reviews.json', []), getJson('downloads.json', {})])
+    .then(function (result) {
+      state.apps = Array.isArray(result[0]) ? result[0] : [];
+      state.reviews = Array.isArray(result[1]) ? result[1] : [];
+      state.downloads = result[2] && typeof result[2] === 'object' ? result[2] : {};
+
+      renderOverview();
+      renderApps();
+      fillAppSelects();
+      renderReviews();
+      renderStats();
+
+      var who = 'Приложений: ' + state.apps.length;
+      var session = null;
+      try { session = JSON.parse(localStorage.getItem('openmarket.session.user') || 'null'); } catch (ignored) {}
+      el('who').textContent = session ? (session.email + ' · ' + who) : who;
+    })
+    .catch(function () {
+      el('who').textContent = 'Не удалось загрузить данные каталога';
+    });
+
+  show((location.hash || '#overview').replace('#', ''));
+})();
+</script>
+</body>
+</html>
