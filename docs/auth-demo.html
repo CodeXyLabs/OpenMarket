@@ -64,6 +64,26 @@
       console.error(error.code); // user_not_found | wrong_password | registry_unavailable
     });
 &lt;/script&gt;</pre>
+
+    <p class="auth-note">
+      Пример для Android-приложения или игры на Kotlin (тот же реестр, тот же хеш <code>sha256(salt:пароль)</code>):
+    </p>
+
+    <pre class="snippet">val registry = URL("https://raw.githubusercontent.com/CodeXyLabs/OpenMarket/main/users.txt")
+    .readText()
+
+val row = registry.lineSequence()
+    .filter { it.isNotBlank() &amp;&amp; !it.startsWith("#") }
+    .map { it.split("|") }
+    .firstOrNull { it.size &gt;= 5 &amp;&amp; it[0].trim().equals(email, ignoreCase = true) }
+    ?: error("user_not_found")
+
+val digest = MessageDigest.getInstance("SHA-256")
+    .digest("${row[1].trim()}:$password".toByteArray())
+val hash = digest.joinToString("") { "%02x".format(it) }
+
+if (!hash.equals(row[2].trim(), ignoreCase = true)) error("wrong_password")
+val role = row[4].trim()   // user | admin</pre>
   </section>
 </main>
 
