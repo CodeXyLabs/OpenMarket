@@ -3,22 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Вход через OpenMarket</title>
+  <title>Вход через OpenMarket — подключение</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    .auth-wrap { max-width: 720px; margin: 32px auto 64px; padding: 0 20px; }
+    .auth-wrap { max-width: 760px; margin: 32px auto 64px; padding: 0 20px; }
     .auth-card { background: var(--surface, #fff); border-radius: 22px; padding: 24px; box-shadow: 0 8px 28px rgba(30, 20, 70, .08); }
     .auth-card h1 { margin: 0 0 8px; font-size: 26px; }
-    .auth-field { display: block; margin-top: 16px; font-size: 14px; color: var(--muted, #6b6780); }
-    .auth-field input { display: block; width: 100%; margin-top: 6px; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(30, 20, 70, .18); font-size: 15px; background: #fff; color: #1d1a2b; }
-    .auth-status { margin-top: 18px; padding: 14px 16px; border-radius: 14px; font-size: 14px; line-height: 1.5; display: none; }
-    .auth-status.show { display: block; }
-    .auth-status.ok { background: #e8f7ee; color: #125c34; }
-    .auth-status.err { background: #fdecec; color: #8c1d1d; }
-    .auth-user { margin-top: 14px; font-size: 15px; }
-    .auth-user b { word-break: break-all; }
-    .auth-note { margin-top: 24px; font-size: 13px; line-height: 1.6; color: var(--muted, #6b6780); }
-    pre.snippet { margin-top: 16px; padding: 16px; border-radius: 16px; background: #17132a; color: #e9e6f5; font-size: 12.5px; overflow-x: auto; line-height: 1.55; }
+    .auth-card h2 { margin: 28px 0 10px; font-size: 17px; }
+    .auth-slot { margin: 18px 0 4px; padding: 16px; border-radius: 16px; background: #f7f5ff; }
+    .auth-note { margin-top: 20px; font-size: 13px; line-height: 1.6; color: var(--muted, #6b6780); }
+    pre.snippet { margin-top: 10px; padding: 16px; border-radius: 16px; background: #17132a; color: #e9e6f5; font-size: 12.5px; overflow-x: auto; line-height: 1.55; }
+    code.inline { background: #f1eefc; border-radius: 6px; padding: 1px 5px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -26,136 +21,62 @@
   <a class="brand" href="index.html"><span class="logo"></span><span>OpenMarket</span></a>
   <div class="actions">
     <a class="btn ghost" href="index.html">В каталог</a>
+    <a class="btn ghost" href="guide.html">Гайд разработчика</a>
   </div>
 </header>
 
 <main class="auth-wrap">
   <section class="auth-card">
     <h1>Вход через OpenMarket</h1>
-    <p class="muted">Один аккаунт для сайтов и приложений сообщества: проверка идёт по реестру пользователей магазина.</p>
+    <p class="muted">Один аккаунт магазина для сайтов, приложений и игр. Подключение — две строки кода.</p>
 
-    <form id="authForm" autocomplete="on">
-      <label class="auth-field">Почта OpenMarket
-        <input id="authEmail" type="email" required placeholder="you@example.com" autocomplete="username">
-      </label>
-      <label class="auth-field">Пароль
-        <input id="authPassword" type="password" required placeholder="Пароль от OpenMarket" autocomplete="current-password">
-      </label>
-      <button class="btn primary wide" type="submit" id="authSubmit" style="margin-top:18px">Войти</button>
-      <button class="btn ghost wide" type="button" id="authSignOut" style="margin-top:8px; display:none">Выйти из аккаунта</button>
-    </form>
+    <h2>Живая кнопка</h2>
+    <div class="auth-slot" id="omAuth"></div>
+    <p class="auth-note">Это настоящий виджет: он проверяет аккаунт по реестру OpenMarket и запоминает вход в браузере.</p>
 
-    <div id="authStatus" class="auth-status"></div>
-    <div id="authUser" class="auth-user"></div>
-
-    <p class="auth-note">
-      Это упрощённая схема: реестр <code>users.txt</code> хранится в публичном репозитории, поэтому хеши паролей
-      технически доступны всем. Не используйте здесь пароль, который вы применяете в других сервисах.
-      Для боевых проектов нужен полноценный OAuth-провайдер.
-    </p>
-
-    <pre class="snippet">&lt;script src="openmarket-auth.js"&gt;&lt;/script&gt;
+    <h2>Подключение на сайте</h2>
+    <pre class="snippet">&lt;div id="om-auth"&gt;&lt;/div&gt;
+&lt;script src="https://codexylabs.github.io/OpenMarket/openmarket-auth.js"&gt;&lt;/script&gt;
 &lt;script&gt;
-  OpenMarketAuth.signIn('user@example.com', 'пароль')
-    .then(function (session) {
-      console.log('Вошел:', session.email, 'роль:', session.role);
-    })
-    .catch(function (error) {
-      console.error(error.code); // user_not_found | wrong_password | registry_unavailable
-    });
+  OpenMarketAuth.mount('#om-auth', {
+    onSignIn: function (user) {
+      console.log('Вошёл:', user.email, 'роль:', user.role);
+    }
+  });
 &lt;/script&gt;</pre>
 
+    <h2>Без виджета (свой интерфейс)</h2>
+    <pre class="snippet">OpenMarketAuth.signIn(email, password)
+  .then(function (user) { /* user.email, user.role */ })
+  .catch(function (error) { /* error.code */ });
+
+OpenMarketAuth.currentUser();   // сессия из localStorage или null
+OpenMarketAuth.signOut();
+OpenMarketAuth.on('change', function (user) { /* вход/выход */ });</pre>
+
+    <h2>В Android-приложении или игре</h2>
+    <p class="auth-note">Возьмите готовый файл
+      <a href="OpenMarketAuth.android.kt">OpenMarketAuth.android.kt</a> — это один класс без зависимостей:
+      <code class="inline">OpenMarketAuth.signIn(email, password) { user, error -&gt; }</code>.</p>
+
     <p class="auth-note">
-      Пример для Android-приложения или игры на Kotlin (тот же реестр, тот же хеш <code>sha256(salt:пароль)</code>):
+      Схема упрощённая: реестр <code class="inline">users.txt</code> лежит в публичном репозитории, поэтому
+      хеши паролей технически видны всем. Не используйте здесь пароль от других сервисов; для боевого
+      проекта понадобится полноценный OAuth-провайдер.
     </p>
-
-    <pre class="snippet">val registry = URL("https://raw.githubusercontent.com/CodeXyLabs/OpenMarket/main/users.txt")
-    .readText()
-
-val row = registry.lineSequence()
-    .filter { it.isNotBlank() &amp;&amp; !it.startsWith("#") }
-    .map { it.split("|") }
-    .firstOrNull { it.size &gt;= 5 &amp;&amp; it[0].trim().equals(email, ignoreCase = true) }
-    ?: error("user_not_found")
-
-val digest = MessageDigest.getInstance("SHA-256")
-    .digest("${row[1].trim()}:$password".toByteArray())
-val hash = digest.joinToString("") { "%02x".format(it) }
-
-if (!hash.equals(row[2].trim(), ignoreCase = true)) error("wrong_password")
-val role = row[4].trim()   // user | admin</pre>
   </section>
 </main>
 
 <script src="openmarket-auth.js"></script>
 <script>
-  (function () {
-    var form = document.getElementById('authForm');
-    var emailInput = document.getElementById('authEmail');
-    var passwordInput = document.getElementById('authPassword');
-    var submit = document.getElementById('authSubmit');
-    var signOutBtn = document.getElementById('authSignOut');
-    var status = document.getElementById('authStatus');
-    var userBox = document.getElementById('authUser');
-
-    function setStatus(text, kind) {
-      status.textContent = text;
-      status.className = 'auth-status show ' + (kind || '');
+  OpenMarketAuth.mount('#omAuth', {
+    onSignIn: function (user) {
+      console.log('Вошёл:', user.email);
+    },
+    onSignOut: function () {
+      console.log('Вышел из аккаунта');
     }
-
-    function clearStatus() {
-      status.className = 'auth-status';
-      status.textContent = '';
-    }
-
-    function renderSession() {
-      var session = OpenMarketAuth.currentUser();
-      if (session) {
-        userBox.innerHTML = 'Вы вошли как <b>' + session.email + '</b>, роль: ' + session.role;
-        signOutBtn.style.display = 'inline-block';
-        submit.textContent = 'Войти другим аккаунтом';
-      } else {
-        userBox.textContent = '';
-        signOutBtn.style.display = 'none';
-        submit.textContent = 'Войти';
-      }
-    }
-
-    var messages = {
-      user_not_found: 'Аккаунт с такой почтой не найден в OpenMarket.',
-      wrong_password: 'Неверный пароль.',
-      registry_unavailable: 'Не удалось проверить аккаунт: нет связи с реестром.',
-      fill_fields: 'Заполните почту и пароль.',
-      insecure_context: 'Откройте страницу по HTTPS: браузер блокирует криптографию на http.'
-    };
-
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      clearStatus();
-      submit.disabled = true;
-      setStatus('Проверяем аккаунт…', '');
-
-      OpenMarketAuth.signIn(emailInput.value, passwordInput.value)
-        .then(function (session) {
-          setStatus('Вход выполнен: ' + session.email, 'ok');
-          renderSession();
-        })
-        .catch(function (error) {
-          setStatus(messages[error.code] || error.message || 'Ошибка входа', 'err');
-        })
-        .then(function () {
-          submit.disabled = false;
-        });
-    });
-
-    signOutBtn.addEventListener('click', function () {
-      OpenMarketAuth.signOut();
-      clearStatus();
-      renderSession();
-    });
-
-    renderSession();
-  })();
+  });
 </script>
 </body>
 </html>
