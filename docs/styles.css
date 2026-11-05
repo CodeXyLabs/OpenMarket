@@ -680,3 +680,10 @@ code.inline {
 
 .console .main { max-width: none; margin: 0; padding: 24px 32px 48px; }
 @media (max-width: 840px) { .console .main { padding: 18px; } }
+
+/* footer */
+.site-footer { margin-top: 40px; padding: 24px 24px 32px; background: var(--md-surface-container-low); border-top: 1px solid var(--md-outline-variant); }
+.footer-inner { max-width: 1160px; margin: 0 auto; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+.footer-links a { font-size: 13.5px; color: var(--md-on-surface-variant); text-decoration: none; }
+.footer-links a:hover { color: var(--md-primary); }
