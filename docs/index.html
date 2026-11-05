@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenMarket — каталог приложений</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#">
+    <span class="logo"></span>
+    <span>OpenMarket</span>
+  </a>
+  <input id="search" class="search" type="search" placeholder="Поиск приложений…" autocomplete="off">
+  <div class="actions">
+    <button id="btnPublish" class="btn primary">Опубликовать</button>
+    <button id="btnAuth" class="btn ghost">Войти</button>
+    <button id="btnSettings" class="icon-btn" title="Настройки">⚙</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Каталог приложений</h1>
+    <p class="muted">Публикуйте и находите приложения сообщества. Каталог хранится в репозитории GitHub.</p>
+    <div class="stats"><strong id="statApps">0</strong> приложений</div>
+  </section>
+
+  <section class="toolbar">
+    <div id="filters" class="chips">
+      <button class="chip active" data-cat="all">Все</button>
+      <button class="chip" data-cat="app">Приложения</button>
+      <button class="chip" data-cat="game">Игры</button>
+    </div>
+    <select id="sort" class="select">
+      <option value="new">Сначала новые</option>
+      <option value="name">По названию</option>
+      <option value="size">По размеру</option>
+    </select>
+  </section>
+
+  <section id="grid" class="grid"></section>
+  <p id="empty" class="muted center hidden">Пока нет приложений</p>
+</main>
+
+<div id="authModal" class="modal hidden">
+  <div class="modal-card">
+    <button class="close" data-close="authModal">✕</button>
+    <h2 id="authTitle">Вход</h2>
+    <div class="tabs">
+      <button id="tabLogin" class="tab active">Вход</button>
+      <button id="tabRegister" class="tab">Регистрация</button>
+    </div>
+    <form id="authForm" class="form">
+      <label>Почта<input id="authEmail" type="email" required placeholder="you@example.com"></label>
+      <label>Пароль<input id="authPassword" type="password" required minlength="6" placeholder="Минимум 6 символов"></label>
+      <p id="authHint" class="muted small"></p>
+      <button type="submit" class="btn primary wide" id="authSubmit">Войти</button>
+    </form>
+  </div>
+</div>
+
+<div id="publishModal" class="modal hidden">
+  <div class="modal-card wide-card">
+    <button class="close" data-close="publishModal">✕</button>
+    <h2>Новое приложение</h2>
+    <p id="publishHint" class="muted small"></p>
+    <form id="publishForm" class="form grid-2">
+      <label>Название<input id="appName" required maxlength="60"></label>
+      <label>Разработчик<input id="appDeveloper" required maxlength="60"></label>
+      <label>Категория
+        <select id="appCategory">
+          <option value="Приложение">Приложение</option>
+          <option value="Игра">Игра</option>
+        </select>
+      </label>
+      <label>Подкатегория<input id="appSubcategory" maxlength="40" placeholder="Необязательно"></label>
+      <label class="span-2">Описание<textarea id="appDescription" rows="3" maxlength="600"></textarea></label>
+      <label class="span-2">Теги через запятую<input id="appTags" placeholder="редактор, заметки"></label>
+      <label class="span-2">APK-файл<input id="appApk" type="file" accept=".apk,application/vnd.android.package-archive" required></label>
+      <label class="span-2">Иконка (картинка, необязательно)<input id="appIcon" type="file" accept="image/*"></label>
+      <div class="span-2 progress hidden" id="publishProgress"><div class="bar" id="publishBar"></div></div>
+      <button class="btn primary wide span-2" type="submit" id="publishSubmit">Опубликовать</button>
+    </form>
+  </div>
+</div>
+
+<div id="detailModal" class="modal hidden">
+  <div class="modal-card wide-card">
+    <button class="close" data-close="detailModal">✕</button>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal hidden">
+  <div class="modal-card">
+    <button class="close" data-close="settingsModal">✕</button>
+    <h2>Настройки</h2>
+    <p class="muted small">Токен нужен для регистрации и публикации. Он хранится только в этом браузере (localStorage) и не попадает в репозиторий.</p>
+    <form id="settingsForm" class="form">
+      <label>GitHub-токен<input id="settingsToken" type="password" placeholder="ghp_… или github_pat_…"></label>
+      <button type="submit" class="btn primary wide">Сохранить</button>
+      <button type="button" class="btn ghost wide" id="settingsClear">Удалить токен</button>
+    </form>
+    <p id="settingsStatus" class="muted small"></p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <span>OpenMarket · автор и владелец: <a href="https://github.com/CodeXyLabs" target="_blank" rel="noopener">CodeXyLabs</a></span>
+    <span>
+      <a href="https://github.com/CodeXyLabs/OpenMarket" target="_blank" rel="noopener">Репозиторий</a>
+      · <a href="https://github.com/CodeXyLabs/OpenMarket/blob/main/apps.json" target="_blank" rel="noopener">apps.json</a>
+    </span>
+  </div>
+</footer>
+
+<div id="toast" class="toast hidden"></div>
+<script src="app.js"></script>
+</body>
+</html>
