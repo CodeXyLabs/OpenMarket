@@ -420,3 +420,21 @@ main { max-width: 1160px; margin: 0 auto; padding: 28px 24px 40px; }
   .hero h1 { font-size: 26px; }
   main { padding: 20px 16px 32px; }
 }
+
+/* RuStore-like hero banner and catalog cards */
+.hero {
+  position: relative;
+  padding: 30px 28px;
+  border-radius: 28px;
+  background: linear-gradient(120deg, #4B2BE6 0%, #7B3BEA 52%, #FF7A45 100%);
+  color: #fff;
+  overflow: hidden;
+}
+.hero h1 { color: #fff; font-size: 32px; }
+.hero .muted { color: rgba(255, 255, 255, .88); }
+.hero .stats { background: rgba(255, 255, 255, .18); color: #fff; }
+.hero .btn.ghost { background: rgba(255, 255, 255, .18); color: #fff; border: 0; }
+.hero .btn.ghost:hover { background: rgba(255, 255, 255, .3); }
+.grid { gap: 14px; }
+.card { border-radius: 22px; padding: 16px; box-shadow: 0 6px 18px rgba(30, 20, 70, .06); }
+.card:hover { box-shadow: 0 14px 30px rgba(30, 20, 70, .12); transform: translateY(-3px); }
