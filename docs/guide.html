@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Гайд разработчика — OpenMarket</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .guide-wrap { max-width: 820px; margin: 32px auto 64px; padding: 0 20px; }
+    .guide-head h1 { margin: 0 0 8px; font-size: 28px; }
+    .guide-head p { margin: 0 0 20px; }
+    .guide-cta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .step { background: var(--surface, #fff); border-radius: 22px; padding: 20px 22px; margin-bottom: 12px; box-shadow: 0 8px 28px rgba(30, 20, 70, .07); }
+    .step h2 { margin: 0 0 8px; font-size: 17px; }
+    .step p { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--muted, #6b6780); }
+    .step .step-badge { display: inline-block; min-width: 26px; height: 26px; margin-right: 8px; border-radius: 13px; background: #ede9ff; color: #4B2BE6; font-size: 13px; font-weight: 600; text-align: center; line-height: 26px; }
+    .guide-tip { margin-top: 20px; padding: 16px 18px; border-radius: 16px; background: #f3f1fb; font-size: 13.5px; line-height: 1.6; color: #4a4661; }
+    .guide-tip a { color: #4B2BE6; }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="logo"></span><span>OpenMarket</span></a>
+  <div class="actions">
+    <a class="btn ghost" href="index.html">В каталог</a>
+    <a class="btn ghost" href="auth-demo.html">Вход через OpenMarket</a>
+  </div>
+</header>
+
+<main class="guide-wrap">
+  <section class="guide-head">
+    <h1>Гайд разработчика</h1>
+    <p class="muted">Семь шагов от APK до публикации — то же самое, что в приложении, но для сайта.</p>
+    <div class="guide-cta">
+      <a class="btn primary" href="index.html">Опубликовать приложение</a>
+      <a class="btn ghost" href="auth-demo.html">Войти через OpenMarket</a>
+    </div>
+  </section>
+
+  <section class="step">
+    <h2><span class="step-badge">1</span>Подготовьте APK и не меняйте подпись</h2>
+    <p>Соберите релизный APK и подпишите его одним ключом. OpenMarket сверяет отпечаток подписи между версиями: если подпись сменится, обновление будет заблокировано. Debug-сборки помечаются как рискованные.</p>
+  </section>
+
+  <section class="step">
+    <h2><span class="step-badge">2</span>Соберите материалы</h2>
+    <p>Иконка 512×512 и 1–5 скриншотов. Аккуратная карточка повышает индекс доверия: он складывается из подписи, разрешений и отзывов.</p>
+  </section>
+
+  <section class="step">
+    <h2><span class="step-badge">3</span>Заполните карточку</h2>
+    <p>Название, разработчик, описание, категория, подкатегория и теги. Теги вводятся через запятую — по ним работает поиск, поэтому они важнее украшения.</p>
+  </section>
+
+  <section class="step">
+    <h2><span class="step-badge">4</span>Опубликуйте</h2>
+    <p>На сайте публикация идёт напрямую в репозиторий и требует GitHub-токен: он вводится в настройках (⚙) и хранится только в вашем браузере. Файл до 90 МБ; крупные APK удобнее публиковать из Android-приложения, там лимит выше. Если публикуете из приложения — загрузка идёт в фоне, и приложение можно закрыть.</p>
+  </section>
+
+  <section class="step">
+    <h2><span class="step-badge">5</span>Смотрите кабинет разработчика</h2>
+    <p>Установки, рейтинг и отзывы по каждому вашему приложению видны в кабинете разработчика в Android-приложении: сайт каталога показывает только карточки. Скачивание без установки не считается установкой.</p>
+  </section>
+
+  <section class="step">
+    <h2><span class="step-badge">6</span>Выпускайте обновления</h2>
+    <p>На карточке приложения в приложении есть «Загрузить новую версию» и «Откатить версию». Пользователи видят обновление автоматически, а прежнюю версию можно вернуть из истории.</p>
+  </section>
+
+  <section class="step">
+    <h2><span class="step-badge">7</span>Собирайте обратную связь</h2>
+    <p>Отзывы, замечания администратора и ответы разработчика видны на карточке. Быстрый ответ повышает индекс доверия и помогает пройти верификацию.</p>
+  </section>
+
+  <div class="guide-tip">
+    Подсказка: место в каталоге зависит от рейтинга, числа отзывов и верификации администратора, а не от даты публикации.
+    Примеры кода для входа по аккаунту OpenMarket — на странице <a href="auth-demo.html">«Вход через OpenMarket»</a>.
+  </div>
+</main>
+
+</body>
+</html>
