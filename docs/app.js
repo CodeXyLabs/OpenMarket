@@ -515,12 +515,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   $('btnPublish').addEventListener('click', () => {
-    if (!state.session) {
-      setAuthMode('login');
-      openModal('authModal');
-      toast('Сначала войдите');
-      return;
-    }
     if (!requireToken()) return;
     openModal('publishModal');
   });
