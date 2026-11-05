@@ -5,58 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Консоль разработчика — OpenMarket</title>
   <link rel="stylesheet" href="styles.css">
-  <style>
-    :root { --brand: #4B2BE6; --ink: #1d1a2b; --muted: #6b6780; --line: rgba(30, 20, 70, .1); }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: #f7f6fb; color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-    .console { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
-    .side { background: #fff; border-right: 1px solid var(--line); padding: 20px 14px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-    .side .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; margin: 0 8px 24px; text-decoration: none; color: var(--ink); }
-    .side .logo { width: 26px; height: 26px; border-radius: 9px; background: linear-gradient(135deg, #4B2BE6, #A22BE0 60%, #FF7A45); }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 12px; font-size: 14px; color: #3c3850; text-decoration: none; cursor: pointer; }
-    .nav-item:hover { background: #f2effc; }
-    .nav-item.active { background: #ede9ff; color: var(--brand); font-weight: 600; }
-    .nav-sep { margin: 16px 12px 8px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #9a95ad; }
-    .main { padding: 28px 32px 48px; min-width: 0; }
-    .topline { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
-    .topline h1 { margin: 0; font-size: 24px; }
-    .topline .who { font-size: 13px; color: var(--muted); }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 24px; }
-    .card { background: #fff; border-radius: 18px; padding: 18px; border: 1px solid var(--line); }
-    .card .label { font-size: 12.5px; color: var(--muted); }
-    .card .value { font-size: 26px; font-weight: 700; margin-top: 6px; }
-    .panel { background: #fff; border-radius: 20px; border: 1px solid var(--line); padding: 20px; margin-bottom: 18px; }
-    .panel h2 { margin: 0 0 14px; font-size: 17px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-    th { font-size: 12.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-    tr:last-child td { border-bottom: 0; }
-    .muted { color: var(--muted); }
-    .pill { display: inline-block; padding: 3px 9px; border-radius: 999px; background: #f1eefc; font-size: 12px; color: #4a3fa8; }
-    .pill.ok { background: #e8f7ee; color: #125c34; }
-    .pill.warn { background: #fff4e5; color: #8a4b00; }
-    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
-    .toolbar input, .toolbar select { padding: 9px 12px; border-radius: 11px; border: 1px solid var(--line); font: inherit; font-size: 14px; background: #fff; color: var(--ink); }
-    .btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 13px; padding: 10px 16px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
-    .btn.primary { background: var(--brand); color: #fff; }
-    .btn.ghost { background: #f1eefc; color: #3c3850; }
-    .review { border-bottom: 1px solid var(--line); padding: 14px 0; }
-    .review:last-child { border-bottom: 0; }
-    .review .head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-size: 13.5px; }
-    .review .stars { color: #f2a20c; letter-spacing: 1px; }
-    .review p { margin: 8px 0 0; font-size: 14px; line-height: 1.55; }
-    .review .reply { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #f7f5ff; font-size: 13.5px; line-height: 1.5; }
-    .bars { display: flex; align-items: flex-end; gap: 8px; height: 150px; margin-top: 8px; }
-    .bars div { flex: 1; background: linear-gradient(180deg, #7a5cf0, #4B2BE6); border-radius: 8px 8px 3px 3px; min-height: 3px; }
-    .empty { padding: 26px 0; text-align: center; color: var(--muted); font-size: 14px; }
-    .section { display: none; }
-    .section.active { display: block; }
-    @media (max-width: 760px) {
-      .console { grid-template-columns: 1fr; }
-      .side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
-      .main { padding: 18px; }
-    }
-  </style>
 </head>
 <body>
 <div class="console">
