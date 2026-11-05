@@ -9,6 +9,22 @@ const CONFIG = {
 
 const FILES = { users: 'users.txt', apps: 'apps.json' };
 
+function workerUrl() {
+  const fromConfig = (window.OPENMARKET_CONFIG && window.OPENMARKET_CONFIG.workerUrl) || '';
+  const fromStorage = localStorage.getItem('om_worker') || '';
+  return (fromStorage || fromConfig).replace(/\/+$/, '');
+}
+
+function apiBase() {
+  const worker = workerUrl();
+  return worker || CONFIG.apiBase;
+}
+
+function uploadsBase() {
+  const worker = workerUrl();
+  return worker ? `${worker}/uploads` : CONFIG.uploadsBase;
+}
+
 const state = {
   apps: [],
   category: 'all',
@@ -30,7 +46,7 @@ function toast(message, ms = 2600) {
 }
 
 function token() {
-  return localStorage.getItem('om_token') || '';
+  return localStorage.getItem('om_token') || CONFIG.token || '';
 }
 
 function requireToken() {
@@ -92,7 +108,7 @@ async function readTextFile(name) {
 }
 
 async function fileSha(name) {
-  const url = `${CONFIG.apiBase}/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${name}?ref=${CONFIG.branch}`;
+  const url = `${apiBase()}/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${name}?ref=${CONFIG.branch}`;
   const res = await fetch(url, { headers: headers() });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Не удалось получить ${name} (${res.status})`);
@@ -102,7 +118,7 @@ async function fileSha(name) {
 
 async function writeTextFile(name, text, message) {
   const sha = await fileSha(name);
-  const url = `${CONFIG.apiBase}/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${name}`;
+  const url = `${apiBase()}/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${name}`;
   const payload = { message, content: b64encodeUtf8(text), branch: CONFIG.branch };
   if (sha) payload.sha = sha;
 
@@ -286,7 +302,7 @@ function setAuthMode(mode) {
 }
 
 async function createRelease(releaseName) {
-  const res = await fetch(`${CONFIG.apiBase}/repos/${CONFIG.owner}/${CONFIG.repo}/releases`, {
+  const res = await fetch(`${apiBase()}/repos/${CONFIG.owner}/${CONFIG.repo}/releases`, {
     method: 'POST',
     headers: headers({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({
@@ -304,7 +320,7 @@ async function createRelease(releaseName) {
 function uploadAsset(releaseId, file, assetName, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    const url = `${CONFIG.uploadsBase}/repos/${CONFIG.owner}/${CONFIG.repo}/releases/${releaseId}/assets?name=${encodeURIComponent(assetName)}`;
+    const url = `${uploadsBase()}/repos/${CONFIG.owner}/${CONFIG.repo}/releases/${releaseId}/assets?name=${encodeURIComponent(assetName)}`;
     xhr.open('POST', url);
     xhr.setRequestHeader('Authorization', `Bearer ${token()}`);
     xhr.setRequestHeader('Accept', 'application/vnd.github+json');
