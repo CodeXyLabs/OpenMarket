@@ -117,20 +117,36 @@ async function fileSha(name) {
 }
 
 async function writeTextFile(name, text, message) {
-  const sha = await fileSha(name);
   const url = `${apiBase()}/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${name}`;
-  const payload = { message, content: b64encodeUtf8(text), branch: CONFIG.branch };
-  if (sha) payload.sha = sha;
+  const content = b64encodeUtf8(text);
+  let lastError = 'Не удалось записать файл';
 
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: headers({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Не удалось записать ${name} (${res.status}): ${body}`);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let sha = null;
+    try {
+      sha = await fileSha(name);
+    } catch (e) {
+      sha = null;
+    }
+
+    const payload = { message, content, branch: CONFIG.branch };
+    if (sha) payload.sha = sha;
+
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: headers({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) return;
+
+    lastError = `Не удалось записать ${name} (${res.status})`;
+    try {
+      const body = await res.text();
+      if (body) lastError += `: ${body}`;
+    } catch (e) { /* ignore */ }
   }
+
+  throw new Error(lastError);
 }
 
 function parseUsers(raw) {
@@ -337,37 +353,76 @@ function uploadAsset(releaseId, file, assetName, onProgress) {
   });
 }
 
-async function publishApp(form) {
+async function fileToBase64(file) {
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+async function uploadFileContents(file, path) {
+  const content = await fileToBase64(file);
+  const url = `${apiBase()}/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`;
+  const payload = {
+    message: `OpenMarket web: ${path}`,
+    content,
+    branch: CONFIG.branch,
+  };
+
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: headers({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    let body = '';
+    try { body = await res.text(); } catch (e) { /* ignore */ }
+    throw new Error(`Не удалось загрузить файл (${res.status})${body ? ': ' + body : ''}`);
+  }
+
+  return `${CONFIG.rawBase}/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`;
+}
+
+async function publishApp() {
   const apk = $('appApk').files[0];
   if (!apk) throw new Error('Выберите APK-файл');
+  if (apk.size > 40 * 1024 * 1024) {
+    throw new Error('APK больше 40 МБ — опубликуйте его из приложения OpenMarket');
+  }
 
   const name = $('appName').value.trim();
-  const releaseName = name;
-  const releaseId = await createRelease(releaseName);
+  const id = crypto.randomUUID ? crypto.randomUUID() : `web-${Date.now()}`;
+  const safeName = apk.name.replace(/[^A-Za-z0-9._-]/g, '_') || 'app.apk';
+  const apkPath = `apps/${id}/${safeName}`;
 
-  const apkAsset = await uploadAsset(releaseId, apk, apk.name, (percent) => {
-    $('publishProgress').classList.remove('hidden');
-    $('publishBar').style.width = `${percent}%`;
-  });
+  $('publishProgress').classList.remove('hidden');
+  $('publishBar').style.width = '15%';
+
+  const downloadUrl = await uploadFileContents(apk, apkPath);
+  $('publishBar').style.width = '70%';
 
   let iconUrl = null;
   const icon = $('appIcon').files[0];
   if (icon) {
-    const iconAsset = await uploadAsset(
-      releaseId, icon, `icon-${Date.now()}${extensionOf(icon.name)}`,
-    );
-    iconUrl = iconAsset.browser_download_url;
+    const iconPath = `apps/${id}/icon${extensionOf(icon.name) || '.png'}`;
+    iconUrl = await uploadFileContents(icon, iconPath);
   }
+  $('publishBar').style.width = '90%';
 
   const app = {
-    id: crypto.randomUUID ? crypto.randomUUID() : `web-${Date.now()}`,
+    id,
     name,
     developer: $('appDeveloper').value.trim(),
     description: $('appDescription').value.trim(),
     category: $('appCategory').value,
     subcategory: $('appSubcategory').value.trim(),
-    fileName: apk.name,
-    downloadUrl: apkAsset.browser_download_url,
+    fileName: safeName,
+    downloadUrl,
     uploadedAt: Date.now(),
     uploadedBy: state.session ? state.session.email : null,
     iconUrl,
@@ -386,6 +441,7 @@ async function publishApp(form) {
   const apps = raw.trim() ? JSON.parse(raw) : [];
   apps.push(app);
   await writeTextFile(FILES.apps, JSON.stringify(apps), `OpenMarket web: публикация ${name}`);
+  $('publishBar').style.width = '100%';
   toast('Приложение опубликовано');
 }
 
