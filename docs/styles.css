@@ -438,3 +438,9 @@ main { max-width: 1160px; margin: 0 auto; padding: 28px 24px 40px; }
 .grid { gap: 14px; }
 .card { border-radius: 22px; padding: 16px; box-shadow: 0 6px 18px rgba(30, 20, 70, .06); }
 .card:hover { box-shadow: 0 14px 30px rgba(30, 20, 70, .12); transform: translateY(-3px); }
+
+/* Home page collections */
+.picks { margin-bottom: 26px; }
+.picks-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 18px 0 10px; }
+.picks-head h2 { margin: 0; font-size: 19px; letter-spacing: -.2px; color: var(--on-surface); }
+.picks .grid { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
