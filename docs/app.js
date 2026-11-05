@@ -217,6 +217,83 @@ async function loadCatalog() {
   renderCatalog();
 }
 
+function buildCard(app) {
+  const card = document.createElement('article');
+  card.className = 'card';
+  const icon = app.iconUrl
+    ? `<img class="app-icon" src="${app.iconUrl}" alt="">`
+    : `<div class="app-icon">${(app.name || '?').trim().charAt(0).toUpperCase()}</div>`;
+  const size = app.sizeBytes ? `${(app.sizeBytes / 1024 / 1024).toFixed(1)} МБ` : '';
+  const rating = ratingsCache[app.id];
+  card.innerHTML = `
+    ${icon}
+    <div class="card-body">
+      <div class="card-title">${escapeHtml(app.name || 'Без названия')}</div>
+      <div class="card-sub">${escapeHtml(app.developer || '')}</div>
+      <div class="card-meta">
+        <span class="badge">${escapeHtml(app.category || 'Приложение')}</span>
+        ${size ? `<span class="badge">${size}</span>` : ''}
+        ${rating ? `<span class="badge">★ ${rating.toFixed(1)}</span>` : ''}
+        ${app.subcategory ? `<span class="badge">${escapeHtml(app.subcategory)}</span>` : ''}
+      </div>
+    </div>`;
+  card.addEventListener('click', () => showDetails(app));
+  return card;
+}
+
+let ratingsCache = {};
+
+function loadRatings() {
+  return fetch('https://raw.githubusercontent.com/CodeXyLabs/OpenMarket/main/reviews.json?t=' + Date.now(), { cache: 'no-store' })
+    .then((response) => (response.ok ? response.json() : []))
+    .then((list) => {
+      const sums = {};
+      const counts = {};
+      (Array.isArray(list) ? list : []).forEach((review) => {
+        const id = review.appId;
+        if (!id) return;
+        sums[id] = (sums[id] || 0) + (Number(review.rating) || 0);
+        counts[id] = (counts[id] || 0) + 1;
+      });
+      const map = {};
+      Object.keys(sums).forEach((id) => { map[id] = sums[id] / counts[id]; });
+      ratingsCache = map;
+      return map;
+    })
+    .catch(() => {
+      ratingsCache = {};
+      return {};
+    });
+}
+
+function renderPicks() {
+  const picks = $('picks');
+  if (!picks) return;
+
+  picks.classList.toggle('hidden', state.apps.length === 0);
+  if (!state.apps.length) return;
+
+  const newest = state.apps.slice()
+    .sort((a, b) => (b.uploadedAt || 0) - (a.uploadedAt || 0))
+    .slice(0, 3);
+
+  const top = state.apps.slice()
+    .sort((a, b) => {
+      const ra = ratingsCache[a.id] || 0;
+      const rb = ratingsCache[b.id] || 0;
+      if (rb !== ra) return rb - ra;
+      return (b.uploadedAt || 0) - (a.uploadedAt || 0);
+    })
+    .slice(0, 3);
+
+  const topBox = $('pickTop');
+  const newBox = $('pickNew');
+  topBox.innerHTML = '';
+  newBox.innerHTML = '';
+  top.forEach((app) => topBox.appendChild(buildCard(app)));
+  newest.forEach((app) => newBox.appendChild(buildCard(app)));
+}
+
 function renderCatalog() {
   const grid = $('grid');
   const q = state.query.trim().toLowerCase();
@@ -246,27 +323,9 @@ function renderCatalog() {
   $('empty').classList.toggle('hidden', apps.length > 0);
   grid.innerHTML = '';
 
-  apps.forEach((app) => {
-    const card = document.createElement('article');
-    card.className = 'card';
-    const icon = app.iconUrl
-      ? `<img class="app-icon" src="${app.iconUrl}" alt="">`
-      : `<div class="app-icon">${(app.name || '?').trim().charAt(0).toUpperCase()}</div>`;
-    const size = app.sizeBytes ? `${(app.sizeBytes / 1024 / 1024).toFixed(1)} МБ` : '';
-    card.innerHTML = `
-      ${icon}
-      <div class="card-body">
-        <div class="card-title">${escapeHtml(app.name || 'Без названия')}</div>
-        <div class="card-sub">${escapeHtml(app.developer || '')}</div>
-        <div class="card-meta">
-          <span class="badge">${escapeHtml(app.category || 'Приложение')}</span>
-          ${size ? `<span class="badge">${size}</span>` : ''}
-          ${app.subcategory ? `<span class="badge">${escapeHtml(app.subcategory)}</span>` : ''}
-        </div>
-      </div>`;
-    card.addEventListener('click', () => showDetails(app));
-    grid.appendChild(card);
-  });
+  apps.forEach((app) => grid.appendChild(buildCard(app)));
+
+  renderPicks();
 }
 
 function escapeHtml(value) {
@@ -455,6 +514,7 @@ function extensionOf(fileName) {
 document.addEventListener('DOMContentLoaded', () => {
   renderAuthButton();
   loadCatalog();
+  loadRatings().then(renderPicks);
 
   $('search').addEventListener('input', (e) => {
     state.query = e.target.value;
