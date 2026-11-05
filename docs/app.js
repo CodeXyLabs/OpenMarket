@@ -353,15 +353,17 @@ function uploadAsset(releaseId, file, assetName, onProgress) {
   });
 }
 
-async function fileToBase64(file) {
-  const buffer = await file.arrayBuffer();
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
-  }
-  return btoa(binary);
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || '');
+      const comma = result.indexOf(',');
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(new Error('Не удалось прочитать файл'));
+    reader.readAsDataURL(file);
+  });
 }
 
 async function uploadFileContents(file, path) {
@@ -391,8 +393,8 @@ async function uploadFileContents(file, path) {
 async function publishApp() {
   const apk = $('appApk').files[0];
   if (!apk) throw new Error('Выберите APK-файл');
-  if (apk.size > 40 * 1024 * 1024) {
-    throw new Error('APK больше 40 МБ — опубликуйте его из приложения OpenMarket');
+  if (apk.size > 90 * 1024 * 1024) {
+    throw new Error('APK больше 90 МБ — опубликуйте его из приложения OpenMarket');
   }
 
   const name = $('appName').value.trim();
